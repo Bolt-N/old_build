@@ -636,15 +636,12 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   script.SetPermissionsRecursive("/tmp/install", 0, 0, 0755, 0644, None, None)
   script.SetPermissionsRecursive("/tmp/install/bin", 0, 0, 0755, 0755, None, None)
 
-  script.Print("                                            ")
-  script.Print("._______ ._______.______  .______ ._______  ")
-  script.Print(": __   / : .____/:      \ \____  |: .___  \ ")
-  script.Print("|  |>  \ | : _/\ |       |/  ____|| :   |  |")
-  script.Print("|  |>   \|   /  \|   |   |\      ||     :  |")
-  script.Print("|_______/|_.: __/|___|   | \__:__| \_. ___/ ")
-  script.Print("            :/       |___|    :      :/     ")
-  script.Print(" Benzo Rom                           :      ")
-  script.Print("                                            ")
+  script.Print("_______  _______  __     ________   ")
+  script.Print("| __   / |  ___  \ | |   |___ ___|  ")
+  script.Print("|  |>  \ | |   |  || |      | |     ")
+  script.Print("|  |>   \| |___|  || |____  | |     ")
+  script.Print("|_______/ \______/ |______| |_|     ")
+  script.Print("        BOLT-OS ROM                 ")
   script.Print("Running backup scripts and setting permissions...")
 
   if OPTIONS.backuptool:
@@ -734,7 +731,7 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
       script.Unmount("/system")
 
   script.Print(" ")
-  script.Print("Flashing benzoCore..")
+  script.Print("Flashing bolting..")
   script.ShowProgress(0.05, 5)
   script.WriteRawImage("/boot", "boot.img")
 
