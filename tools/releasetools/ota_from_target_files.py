@@ -525,17 +525,6 @@ def GetImage(which, tmpdir, info_dict):
 
   return sparse_img.SparseImage(path, mappath, clobbered_blocks)
 
-
-def CopyInstallTools(output_zip):
-  oldcwd = os.getcwd()
-  os.chdir(os.getenv('OUT'))
-  for root, subdirs, files in os.walk("install"):
-    for f in files:
-      p = os.path.join(root, f)
-      output_zip.write(p, p)
-  os.chdir(oldcwd)
-
-
 def WriteFullOTAPackage(input_zip, output_zip):
   # TODO: how to determine this?  We don't know what version it will
   # be installed on top of. For now, we expect the API just won't
@@ -572,7 +561,7 @@ def WriteFullOTAPackage(input_zip, output_zip):
       info_dict=OPTIONS.info_dict)
 
   has_recovery_patch = HasRecoveryPatch(input_zip)
-  block_based = OPTIONS.block_based and has_recovery_patch
+  block_based = OPTIONS.block_based
 
   metadata["ota-type"] = "BLOCK" if block_based else "FILE"
 
@@ -631,23 +620,34 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   script.AppendExtra("ifelse(is_mounted(\"/system\"), unmount(\"/system\"));")
   device_specific.FullOTA_InstallBegin()
 
-  CopyInstallTools(output_zip)
-  script.UnpackPackageDir("install", "/tmp/install")
-  script.SetPermissionsRecursive("/tmp/install", 0, 0, 0755, 0644, None, None)
-  script.SetPermissionsRecursive("/tmp/install/bin", 0, 0, 0755, 0755, None, None)
-
-  script.Print("_______  _______  __     ________   ")
-  script.Print("| __   / |  ___  \ | |   |___ ___|  ")
-  script.Print("|  |>  \ | |   |  || |      | |     ")
-  script.Print("|  |>   \| |___|  || |____  | |     ")
-  script.Print("|_______/ \______/ |______| |_|     ")
-  script.Print("        BOLT-OS ROM                 ")
-  script.Print("Running backup scripts and setting permissions...")
-
   if OPTIONS.backuptool:
+    if block_based:
+      common.ZipWriteStr(output_zip, "system/bin/backuptool.sh",
+                     ""+input_zip.read("SYSTEM/bin/backuptool.sh"))
+      common.ZipWriteStr(output_zip, "system/bin/backuptool.functions",
+                     ""+input_zip.read("SYSTEM/bin/backuptool.functions"))
     script.Mount("/system")
+    script.Print("Please wait... Running backup")
     script.RunBackup("backup")
     script.Unmount("/system")
+
+  script.Print("****************************************")
+  script.Print("   /       \  /      \ /  |   /        |")
+  script.Print("   $$$$$$$  |/$$$$$$  |$$ |   $$$$$$$$/ ")
+  script.Print("   $$ |__$$ |$$ |  $$ |$$ |      $$ |   ")
+  script.Print("   $$    $$< $$ |  $$ |$$ |      $$ |   ")
+  script.Print("   $$$$$$$  |$$ |  $$ |$$ |      $$ |   ")
+  script.Print("   $$ |__$$ |$$ \__$$ |$$ |_____ $$ |   ")
+  script.Print("   $$    $$/ $$    $$/ $$       |$$ |   ")
+  script.Print("   $$$$$$$/   $$$$$$/  $$$$$$$$/ $$/    ")
+  script.Print("               BOLT-OS ROM              ")
+  script.Print("****************************************")
+  device = GetBuildProp("ro.product.device", OPTIONS.info_dict)
+  model = GetBuildProp("ro.product.model", OPTIONS.info_dict)
+  modver = GetBuildProp("ro.bolt.version", OPTIONS.info_dict)
+  script.Print(" ")
+  script.Print("Device: %s (%s)"%(model, device))
+  script.Print("Version: %s"%(modver)); 
 
   system_progress = 0.75
 
@@ -727,6 +727,7 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
     if block_based:
       script.Mount("/system")
     script.RunBackup("restore")
+    script.Print("Restoring backup...")
     if block_based:
       script.Unmount("/system")
 
@@ -742,6 +743,7 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
     script.AppendExtra(OPTIONS.extra_script)
 
   script.UnmountAll()
+  script.Print("Flash Complete!")  
 
   if OPTIONS.wipe_user_data:
     script.ShowProgress(0.1, 10)

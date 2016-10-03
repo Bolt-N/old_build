@@ -574,7 +574,6 @@ def UnzipTemp(filename, pattern=None):
   OPTIONS.tempfiles.append(tmp)
 
   def unzip_to_dir(filename, dirname):
-    subprocess.call(["rm", "-rf", dirname + filename, "targetfiles-*"])
     cmd = ["unzip", "-o", "-q", filename, "-d", dirname]
     if pattern is not None:
       cmd.append(pattern)
@@ -1382,10 +1381,7 @@ class BlockDifference(object):
     if not self.src:
       # write the output unconditionally
       script.Print(" ")
-      script.Print("Flashing System..")
-    else:
-      script.Print("Patching %s image after verification." % (self.partition,))
-
+      script.Print("Flashing Bolt-Os System..")
     if progress:
       script.ShowProgress(progress, 0)
     self._WriteUpdate(script, output_zip)
@@ -1508,11 +1504,7 @@ class BlockDifference(object):
                          self.device, ranges_str,
                          self._HashZeroBlocks(self.tgt.extended.size())))
       script.Print(" ")
-      script.Print("Verified System..")
-      if partition == "system":
-        code = ErrorCode.SYSTEM_NONZERO_CONTENTS
-      else:
-        code = ErrorCode.VENDOR_NONZERO_CONTENTS
+      script.Print("Verified Bolt-Os System..")
       script.AppendExtra(
           'else\n'
           '  abort("E%d: %s partition has unexpected non-zero contents after '
@@ -1520,7 +1512,7 @@ class BlockDifference(object):
           'endif;' % (code, partition))
     else:
       script.Print(" ")
-      script.Print("Verified System..")
+      script.Print("Verified Bolt-Os System..")
 
     if partition == "system":
       code = ErrorCode.SYSTEM_UNEXPECTED_CONTENTS
