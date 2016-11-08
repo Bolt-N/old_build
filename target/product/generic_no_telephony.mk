@@ -20,6 +20,7 @@
 PRODUCT_PACKAGES := \
     Bluetooth \
     BluetoothMidiService \
+    Calendar \
     Camera2 \
     Gallery2 \
     MusicFX \
